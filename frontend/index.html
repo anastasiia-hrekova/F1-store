@@ -93,6 +93,11 @@
         border-radius: 4px;
         background-color: #ffe5e5;
       }
+      .validation-error {
+        color: red;
+        font-size: 12px;
+        text-align: left;
+      }
     </style>
   </head>
   <body>
@@ -107,6 +112,7 @@
           placeholder="https://example.com/rds"
           required
         />
+        <div id="rds-error" class="validation-error"></div>
       </div>
 
       <div class="form-group">
@@ -117,18 +123,21 @@
           placeholder="https://example.com/redis"
           required
         />
+        <div id="redis-error" class="validation-error"></div>
       </div>
 
-      <button id="submitBtn">Submit</button>
+      <button id="submitBtn" disabled>Submit</button>
+      <div id="form-error" class="validation-error" style="display: none">
+        Заповніть усі поля
+      </div>
 
       <div class="status">
-        <div id="rdsStatus">
-          <div class="loading" id="rdsLoading"></div>
-          <span>RDS: <span id="rdsResult">Idle</span></span>
-        </div>
-
         <div id="redisStatus">
           <div class="loading" id="redisLoading"></div>
+          <span>RDS: <span id="rdsResult">Idle</span></span>
+        </div>
+        <div id="rdsStatus">
+          <div class="loading" id="rdsLoading"></div>
           <span>Redis: <span id="redisResult">Idle</span></span>
         </div>
       </div>
@@ -143,6 +152,21 @@
           return true;
         } catch (_) {
           return false;
+        }
+      }
+
+      function validateForm() {
+        const rdsUrl = document.getElementById('rds-url').value.trim();
+        const redisUrl = document.getElementById('redis-url').value.trim();
+        const submitBtn = document.getElementById('submitBtn');
+        const formError = document.getElementById('form-error');
+
+        if (rdsUrl === '' || redisUrl === '') {
+          submitBtn.disabled = true;
+          formError.style.display = 'block';
+        } else {
+          submitBtn.disabled = false;
+          formError.style.display = 'none';
         }
       }
 
@@ -193,17 +217,18 @@
         const results = [];
 
         if (!isValidURL(rdsUrl)) {
-          rdsUrlInput.classList.add('is-invalid');
+          document.getElementById('rds-error').textContent = 'Invalid RDS URL';
           hasError = true;
         } else {
-          rdsUrlInput.classList.remove('is-invalid');
+          document.getElementById('rds-error').textContent = '';
         }
 
         if (!isValidURL(redisUrl)) {
-          redisUrlInput.classList.add('is-invalid');
+          document.getElementById('redis-error').textContent =
+            'Invalid Redis URL';
           hasError = true;
         } else {
-          redisUrlInput.classList.remove('is-invalid');
+          document.getElementById('redis-error').textContent = '';
         }
 
         if (hasError) {
@@ -270,18 +295,16 @@
         .addEventListener('click', testConnections);
 
       document.getElementById('rds-url').addEventListener('input', function () {
-        if (isValidURL(this.value.trim())) {
-          this.classList.remove('is-invalid');
-        }
+        validateForm();
       });
 
       document
         .getElementById('redis-url')
         .addEventListener('input', function () {
-          if (isValidURL(this.value.trim())) {
-            this.classList.remove('is-invalid');
-          }
+          validateForm();
         });
+
+      validateForm();
     </script>
   </body>
 </html>
