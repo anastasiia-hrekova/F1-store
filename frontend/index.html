@@ -98,6 +98,18 @@
         font-size: 12px;
         text-align: left;
       }
+      .error-message {
+        background-color: #ffe5e5;
+        padding: 10px;
+        border: 1px solid red;
+        border-radius: 4px;
+        color: red;
+        margin-top: 10px;
+      }
+      .error-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
     </style>
   </head>
   <body>
@@ -134,15 +146,20 @@
       <div class="status">
         <div id="redisStatus">
           <div class="loading" id="redisLoading"></div>
-          <span>RDS: <span id="rdsResult">Idle</span></span>
+          <span>Redis: <span id="redisResult">Idle</span></span>
         </div>
         <div id="rdsStatus">
           <div class="loading" id="rdsLoading"></div>
-          <span>Redis: <span id="redisResult">Idle</span></span>
+          <span>RDS: <span id="rdsResult">Idle</span></span>
         </div>
       </div>
 
-      <div class="error-log" id="errorLog" style="display: none"></div>
+      <div id="errorLog" class="error-message" style="display: none">
+        <div id="rdsErrorTitle" class="error-title"></div>
+        <div id="rdsErrorText"></div>
+        <div id="redisErrorTitle" class="error-title"></div>
+        <div id="redisErrorText"></div>
+      </div>
     </div>
 
     <script>
@@ -184,6 +201,10 @@
         const redisResult = document.getElementById('redisResult');
         const rdsResult = document.getElementById('rdsResult');
         const errorLog = document.getElementById('errorLog');
+        const rdsErrorTitle = document.getElementById('rdsErrorTitle');
+        const rdsErrorText = document.getElementById('rdsErrorText');
+        const redisErrorTitle = document.getElementById('redisErrorTitle');
+        const redisErrorText = document.getElementById('redisErrorText');
 
         let errorMessages = [];
 
@@ -191,16 +212,23 @@
           if (result.label === 'Redis Connection') {
             redisResult.textContent = result.message;
             redisResult.className = result.isError ? 'error' : 'success';
-            if (result.isError) errorMessages.push(result.message);
+            if (result.isError) {
+              redisErrorTitle.textContent = 'Redis Error';
+              redisErrorText.textContent = result.message;
+              errorMessages.push(result.message);
+            }
           } else if (result.label === 'RDS Connection') {
             rdsResult.textContent = result.message;
             rdsResult.className = result.isError ? 'error' : 'success';
-            if (result.isError) errorMessages.push(result.message);
+            if (result.isError) {
+              rdsErrorTitle.textContent = 'RDS Error';
+              rdsErrorText.textContent = result.message;
+              errorMessages.push(result.message);
+            }
           }
         });
 
         if (errorMessages.length > 0) {
-          errorLog.innerHTML = errorMessages.join('<br>');
           errorLog.style.display = 'block';
         } else {
           errorLog.style.display = 'none';
